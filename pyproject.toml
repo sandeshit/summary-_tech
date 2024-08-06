@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "olam"
+version = "0.1.0"
+description = ""
+authors = ["sandeshit <thapasandesh56@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+langchain = "^0.2.12"
+langchain-community = "^0.2.11"
+langchain-core = "^0.2.28"
+transformers = "^4.43.3"
+torch = "^2.4.0"
+beautifulsoup4 = "^4.12.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
