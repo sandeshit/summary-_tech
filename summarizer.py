@@ -1,10 +1,10 @@
 from langchain.chains.summarize import load_summarize_chain
-from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.llms.ollama import Ollama
 from langchain.schema import Document
+from dataset import samsum
 
 
-small_paragraph = """Nepal, a landlocked country nestled in the heart of the Himalayas in South Asia, is renowned for its breathtaking landscapes, rich cultural heritage, and diverse ecosystems. With an area of 147,516 square kilometers, Nepal is bordered by China to the north and India to the south, east, and west. The country's geography is marked by three distinct regions: the Terai, the Hill, and the Mountain region, which includes eight of the world's ten tallest mountains, including Mount Everest, the highest peak on Earth. The capital city, Kathmandu, is a vibrant hub of cultural and historical significance, home to ancient temples, palaces, and monuments that date back centuries. Kathmandu Valley, a UNESCO World Heritage site, encapsulates the rich artistic and architectural legacy of the Newar people. Major attractions include the Swayambhunath Stupa (also known as the Monkey Temple), Pashupatinath Temple, and Durbar Square, which showcase a blend of Hindu and Buddhist traditions. Nepal's population is incredibly diverse, with over 120 ethnic groups and 123 spoken languages. The predominant religion is Hinduism, followed by Buddhism, which together shape the country's festivals, rituals, and daily life. Dashain, Tihar, and Losar are among the most widely celebrated festivals, reflecting Nepal's rich cultural mosaic. The country's natural beauty extends beyond its towering peaks to lush valleys, dense forests, and serene lakes. Chitwan National Park and Sagarmatha National Park are UNESCO World Heritage sites that offer glimpses of Nepal extraordinary wildlife, including the Bengal tiger, one-horned rhinoceros, and red panda. Nepal's rivers, originating from the Himalayan glaciers, provide opportunities for rafting and kayaking, while trekking routes like the Annapurna Circuit and Everest Base Camp trek attract adventurers from around the globe. Nepal economy is primarily agrarian, but tourism plays a crucial role, driven by the allure of its natural and cultural treasures. Despite challenges such as political instability and natural disasters, the resilience and hospitality of the Nepali people continue to inspire visitors. As Nepal strides towards modernization, it remains deeply connected to its ancient traditions and the majestic beauty of its landscapes, offering a unique and enriching experience to all who visit. 
+'''small_paragraph = """Nepal, a landlocked country nestled in the heart of the Himalayas in South Asia, is renowned for its breathtaking landscapes, rich cultural heritage, and diverse ecosystems. With an area of 147,516 square kilometers, Nepal is bordered by China to the north and India to the south, east, and west. The country's geography is marked by three distinct regions: the Terai, the Hill, and the Mountain region, which includes eight of the world's ten tallest mountains, including Mount Everest, the highest peak on Earth. The capital city, Kathmandu, is a vibrant hub of cultural and historical significance, home to ancient temples, palaces, and monuments that date back centuries. Kathmandu Valley, a UNESCO World Heritage site, encapsulates the rich artistic and architectural legacy of the Newar people. Major attractions include the Swayambhunath Stupa (also known as the Monkey Temple), Pashupatinath Temple, and Durbar Square, which showcase a blend of Hindu and Buddhist traditions. Nepal's population is incredibly diverse, with over 120 ethnic groups and 123 spoken languages. The predominant religion is Hinduism, followed by Buddhism, which together shape the country's festivals, rituals, and daily life. Dashain, Tihar, and Losar are among the most widely celebrated festivals, reflecting Nepal's rich cultural mosaic. The country's natural beauty extends beyond its towering peaks to lush valleys, dense forests, and serene lakes. Chitwan National Park and Sagarmatha National Park are UNESCO World Heritage sites that offer glimpses of Nepal extraordinary wildlife, including the Bengal tiger, one-horned rhinoceros, and red panda. Nepal's rivers, originating from the Himalayan glaciers, provide opportunities for rafting and kayaking, while trekking routes like the Annapurna Circuit and Everest Base Camp trek attract adventurers from around the globe. Nepal economy is primarily agrarian, but tourism plays a crucial role, driven by the allure of its natural and cultural treasures. Despite challenges such as political instability and natural disasters, the resilience and hospitality of the Nepali people continue to inspire visitors. As Nepal strides towards modernization, it remains deeply connected to its ancient traditions and the majestic beauty of its landscapes, offering a unique and enriching experience to all who visit. 
 
 Records mention the Gopalas and Mahishapalas believed to have been the earliest rulers with their capital at Matatirtha, the south-west corner of the Kathmandu Valley. From the 7th or 8th Century B.C. the Kirantis are said to have ruled the valley. Their famous King Yalumber is even mentioned in the epic, ‘Mahabharat’. Around 300 A.D. the Lichhavis arrived from northern India and overthrew the Kirantis. One of the legacies of the Lichhavis is the Changu Narayan Temple near Bhaktapur, a UNESCO World Heritage Site (Culture), which dates back to the 5th Century. In the early 7th Century, Amshuvarma, the first Thakuri king took over the throne from his father-in-law who was a Lichhavi. He married off his daughter Bhrikuti to the famous Tibetan King Tsong Tsen Gampo thus establishing good relations with Tibet. The Lichhavis brought art and architecture to the valley but the golden age of creativity arrived in 1200 A.D with the Mallas.
 
@@ -25,19 +25,47 @@ The Constituent Assembly made significant progress to accomplish the mandate of 
 Devastating earthquake of 7.8 magnitude hit Nepal in April 2015 followed by several powerful aftershocks causing loss of life, infrastructure and property in an unimaginable scale. Most mid hill districts of Nepal including Kathmandu valley saw massive devastation. This terrible experience created a sense of urgency among political parties to expedite the constitution writing so that a political process would come to a meaningful conclusion and country can divert all its focus on post disaster reconstruction.
 
 After weeks of zeroing in on most contentious issues, political parties sorted them out paving the way to finalize the constitution. The new constitution of Nepal was promulgated through an overwhelming majority of the votes of CA members on September 20, 2015. With this historic achievement, the decades-long dream of Nepali people to have a constitution made through an elected representative body has now been realized. As per the provisions of the new constitution, elections of the new President, Prime Ministers and some other State positions have been successfully held.
-"""
+""" '''
 
-paragraph_docs = Document(page_content= small_paragraph)
+import pandas as pd # Adjust these imports to your actual modules
+from scorer import rogue_score_calculate, bert_score_calculate
 
-docs = [paragraph_docs]
+# Sample definition of the function
 
-llm = Ollama(model = "qwen2:latest", num_gpu= 1)
+# Convert the 'test' dictionary to a DataFrame
+samsum_chain_test_df = pd.DataFrame(samsum['test'])
+
+samsum_chain_test_df = samsum_chain_test_df[:10]
+
+# Apply the function to the 'dialogue' column to convert to Document objects
+
+# Load the language model
+llm = Ollama(model="qwen:0.5b")
 
 
+def invoke(document):
+    paragraph_docs = Document(page_content= document)
 
+    docs = [paragraph_docs]
+    chain_refine = load_summarize_chain(llm, chain_type = "stuff")
 
-chain_stuff = load_summarize_chain(llm, chain_type = "stuff")
+    result_refine = chain_refine.invoke(docs)
 
-result_stuff = chain_stuff.invoke(docs)
+    return result_refine['output_text']
+   
+
+# Apply `invoke` function to each row in the DataFrame
+samsum_chain_test_df['summary_generated'] = samsum_chain_test_df['dialogue'].apply(invoke)
+
+# Remove rows where summary is None or empty
+samsum_chain_test_df = samsum_chain_test_df.dropna(subset=['summary'])
+
+result_stuff_rogue = rogue_score_calculate(samsum_chain_test_df['summary_generated'], samsum_chain_test_df['summary'])
+result_stuff_bert = bert_score_calculate(samsum_chain_test_df['summary_generated'], samsum_chain_test_df['summary'])
+
+print(result_stuff_rogue)
+print(result_stuff_bert)
+
+# Display the updated DataFrame
 
 

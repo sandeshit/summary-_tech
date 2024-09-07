@@ -13,7 +13,19 @@ langchain-core = "^0.2.28"
 transformers = "^4.43.3"
 torch = "^2.4.0"
 beautifulsoup4 = "^4.12.3"
+datasets = "^2.20.0"
+py7zr = "^0.21.1"
+evaluate = "^0.4.2"
+nltk = "^3.8.1"
+absl-py = "^2.1.0"
+rouge-score = "^0.1.2"
+bert-score = "^0.3.13"
+pymongo = "^4.8.0"
+openai = "^1.42.0"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]
