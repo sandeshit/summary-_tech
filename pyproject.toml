@@ -11,17 +11,14 @@ langchain = "^0.2.12"
 langchain-community = "^0.2.11"
 langchain-core = "^0.2.28"
 transformers = "^4.43.3"
-torch = "^2.4.0"
-beautifulsoup4 = "^4.12.3"
 datasets = "^2.20.0"
 py7zr = "^0.21.1"
 evaluate = "^0.4.2"
 nltk = "^3.8.1"
 absl-py = "^2.1.0"
-rouge-score = "^0.1.2"
-bert-score = "^0.3.13"
 pymongo = "^4.8.0"
-openai = "^1.42.0"
+fastapi = {extras = ["standard"], version = "^0.115.4"}
+uvicorn = "^0.32.0"
 
 
 [tool.poetry.group.dev.dependencies]
